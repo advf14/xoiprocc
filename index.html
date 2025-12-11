@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>B52 VIP - Cyberpunk Global</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script src="api.js"></script>
+
+    <style>
+        /* --- GIỮ NGUYÊN 100% CSS CỦA BẠN --- */
+        :root { --neon-gold: #ffd700; --neon-blue: #00f2ff; --neon-red: #ff004c; --bg-dark: #050505; }
+        * { box-sizing: border-box; user-select: none; font-family: 'Rajdhani', sans-serif; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        body { background-color: var(--bg-dark); background-image: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%); height: 100vh; overflow: hidden; color: #fff; }
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
+        .login-box { width: 90%; max-width: 400px; padding: 30px; background: rgba(20, 20, 20, 0.9); border: 1px solid var(--neon-gold); border-radius: 15px; box-shadow: 0 0 30px rgba(255, 215, 0, 0.3); text-align: center; }
+        .login-header { color: var(--neon-gold); font-family: 'Orbitron'; font-size: 2rem; font-weight: 900; margin-bottom: 20px; text-transform: uppercase; }
+        .inp-field { width: 100%; padding: 12px; margin-bottom: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 5px; font-size: 1rem; }
+        .btn-submit { width: 100%; padding: 12px; background: var(--neon-gold); color: #000; border: none; font-weight: 900; cursor: pointer; border-radius: 5px; font-family: 'Orbitron'; font-size: 1.1rem; }
+        .switch-txt { color: #888; margin-top: 15px; cursor: pointer; text-decoration: underline; }
+        .game-root { display: none; width: 100%; height: 100%; position: relative; }
+        .top-bar { position: absolute; top: 0; width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.8); z-index: 100; border-bottom: 1px solid #333; }
+        .user-badge { display: flex; align-items: center; gap: 10px; font-size: 1rem; }
+        .balance-plate { color: var(--neon-gold); font-weight: 900; font-family: 'Orbitron'; font-size: 1.2rem; background: #111; padding: 5px 15px; border-radius: 20px; border: 1px solid #444; }
+        .header-btns { display: flex; gap: 5px; }
+        .btn-tool { background: #222; border: 1px solid #444; color: #ccc; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; cursor: pointer; }
+        .game-wrapper { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -55%); width: 100%; max-width: 800px; display: flex; justify-content: space-around; align-items: center; }
+        .bet-side { width: 25%; height: 280px; border-radius: 10px; border: 2px solid #333; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 10px; background: rgba(0,0,0,0.5); transition: 0.2s; }
+        .bet-side.tai { border-color: rgba(0, 242, 255, 0.3); } .bet-side.xiu { border-color: rgba(255, 0, 76, 0.3); }
+        .bet-side.tai.win { background: rgba(0, 242, 255, 0.2); box-shadow: 0 0 30px var(--neon-blue); border-color: #fff; }
+        .bet-side.xiu.win { background: rgba(255, 0, 76, 0.2); box-shadow: 0 0 30px var(--neon-red); border-color: #fff; }
+        .side-title { font-family: 'Orbitron'; font-size: 3rem; font-weight: 900; margin-top: 20px; }
+        .tai .side-title { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); } .xiu .side-title { color: var(--neon-red); text-shadow: 0 0 10px var(--neon-red); }
+        .current-bet { color: #fff; font-weight: bold; font-family: 'Orbitron'; background: #000; padding: 5px 10px; border-radius: 5px; }
+        .btn-bet { width: 100%; padding: 10px; border: none; font-weight: 900; cursor: pointer; border-radius: 5px; font-family: 'Orbitron'; color: #000; margin-bottom: 10px; }
+        .tai .btn-bet { background: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); } .xiu .btn-bet { background: var(--neon-red); box-shadow: 0 0 10px var(--neon-red); }
+        .center-stage { position: relative; width: 260px; height: 260px; display: flex; justify-content: center; align-items: center; }
+        .plate { width: 240px; height: 240px; background: #222; border-radius: 50%; border: 5px solid var(--neon-gold); display: flex; justify-content: center; align-items: center; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
+        .lid { width: 250px; height: 250px; background: radial-gradient(circle at 30% 30%, #555, #111); border-radius: 50%; position: absolute; border: 4px solid #666; cursor: grab; z-index: 50; display: flex; justify-content: center; align-items: center; transition: transform 0.1s; }
+        .lid::after { content: 'B52'; font-family: 'Orbitron'; font-weight: 900; font-size: 3rem; color: rgba(255,255,255,0.1); }
+        .lid.locked { cursor: not-allowed; }
+        .timer-badge { position: absolute; top: -40px; background: #000; border: 1px solid var(--neon-gold); color: var(--neon-gold); padding: 5px 20px; border-radius: 20px; font-weight: bold; font-family: 'Orbitron'; font-size: 1.2rem; z-index: 60; }
+        .result-overlay { position: absolute; z-index: 40; font-size: 6rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px #fff; opacity: 0; pointer-events: none; font-family: 'Orbitron'; }
+        .dice-wrap { display: flex; gap: 5px; flex-wrap: wrap; width: 140px; justify-content: center; }
+        .dice { width: 40px; height: 40px; background: #fff; border-radius: 8px; display: grid; grid-template-columns: repeat(3, 1fr); padding: 3px; box-shadow: inset 0 0 5px #000; }
+        .dot { background: #000; border-radius: 50%; margin: 2px; visibility: hidden; }
+        .d1 .dot:nth-child(5) { visibility: visible; background: #d00000; width: 16px; height: 16px; margin: 7px; } .d2 .dot:nth-child(1), .d2 .dot:nth-child(9) { visibility: visible; } .d3 .dot:nth-child(1), .d3 .dot:nth-child(5), .d3 .dot:nth-child(9) { visibility: visible; } .d4 .dot:nth-child(1), .d4 .dot:nth-child(3), .d4 .dot:nth-child(7), .d4 .dot:nth-child(9) { visibility: visible; background: #d00000; } .d5 .dot:nth-child(1), .d5 .dot:nth-child(3), .d5 .dot:nth-child(5), .d5 .dot:nth-child(7), .d5 .dot:nth-child(9) { visibility: visible; } .d6 .dot:nth-child(1), .d6 .dot:nth-child(3), .d6 .dot:nth-child(4), .d6 .dot:nth-child(6), .d6 .dot:nth-child(7), .d6 .dot:nth-child(9) { visibility: visible; }
+        .controls-container { position: absolute; bottom: 0; width: 100%; background: linear-gradient(0deg, #000 0%, rgba(0,0,0,0.8) 100%); padding: 15px 0; border-top: 1px solid #333; }
+        .chip-scroll { display: flex; gap: 15px; overflow-x: auto; padding: 10px 20px; scrollbar-width: none; } .chip-scroll::-webkit-scrollbar { display: none; }
+        .chip { flex: 0 0 auto; width: 60px; height: 60px; border-radius: 50%; background: #333; border: 3px dashed #fff; display: flex; justify-content: center; align-items: center; font-weight: 900; font-size: 0.8rem; color: #fff; cursor: pointer; transition: 0.2s; font-family: 'Orbitron'; position: relative; box-shadow: 0 5px 10px rgba(0,0,0,0.5); }
+        .chip[data-val="5000"] { background: #7f8c8d; } .chip[data-val="50000"] { background: #2980b9; } .chip[data-val="100000"] { background: #27ae60; } .chip[data-val="500000"] { background: #c0392b; } .chip[data-val="1000000"] { background: #8e44ad; } .chip[data-val="5000000"] { background: #d35400; } .chip[data-val="10000000"] { background: #16a085; } .chip[data-val="50000000"] { background: linear-gradient(45deg, #ffd700, #b8860b); color: #000; }
+        .chip.active { transform: translateY(-10px) scale(1.1); box-shadow: 0 0 20px rgba(255,255,255,0.5); border-style: solid; z-index: 10; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; display: none; justify-content: center; align-items: center; }
+        .modal-box { background: #111; border: 1px solid var(--neon-gold); width: 90%; max-width: 800px; height: 80%; display: flex; flex-direction: column; border-radius: 10px; }
+        .modal-header { padding: 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; color: var(--neon-gold); font-weight: bold; }
+        .table-container { overflow-y: auto; padding: 15px; flex: 1; } table { width: 100%; border-collapse: collapse; color: #ccc; } th, td { border: 1px solid #333; padding: 10px; text-align: center; } .text-win { color: #00ff00; } .text-lose { color: #ff3333; }
+        .graph-container { padding: 20px; height: 100%; background: #151515; } svg { width: 100%; height: 100%; } .chart-line { fill: none; stroke: var(--neon-gold); stroke-width: 2; } .dot-tai circle { fill: #000; stroke: #fff; } .dot-tai text { fill: #fff; font-size: 10px; font-weight: bold; } .dot-xiu circle { fill: #fff; stroke: #000; } .dot-xiu text { fill: #000; font-size: 10px; font-weight: bold; }
+        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 100% { transform: translate(1px, -2px) rotate(0deg); } } .shaking { animation: shake 0.5s infinite; }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <div class="login-header" id="form-title">B52 VIP</div>
+            <input type="text" id="username" class="inp-field" placeholder="Tên đăng nhập...">
+            <input type="password" id="password" class="inp-field" placeholder="Mật khẩu...">
+            <button class="btn-submit" onclick="handleAuth()">ĐĂNG NHẬP / ĐĂNG KÝ</button>
+            <div class="switch-txt" id="loading-text" style="color: gold; display: none;">Đang kết nối Server...</div>
+        </div>
+    </div>
+
+    <div class="game-root" id="game-ui">
+        <div class="top-bar">
+            <div class="user-badge"><i class="fas fa-user-circle"></i> <span id="display-user">Guest</span><div class="balance-plate"><span style="color:#ffd700">$</span> <span id="balance">0</span></div></div>
+            <div class="header-btns">
+                <div class="btn-tool" onclick="openModal('dataModal')">Lịch Sử</div>
+                <div class="btn-tool" onclick="openModal('graphModal')">Soi Cầu</div>
+                <div class="btn-tool" onclick="logout()" style="color:#ff5555; border-color:#ff5555">Thoát</div>
+            </div>
+        </div>
+
+        <div class="game-wrapper">
+            <div class="bet-side tai" id="side-tai"><div class="side-title">TÀI</div><div class="current-bet" id="bet-tai">0</div><button class="btn-bet" onclick="placeBet('tai')">ĐẶT CƯỢC</button></div>
+            <div class="center-stage">
+                <div class="result-overlay" id="result-num">0</div>
+                <div class="plate"><div class="dice-wrap" id="dice-group"><div class="dice d1"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><div class="dice d1"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><div class="dice d1"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div></div>
+                <div class="lid locked" id="lid"></div>
+                <div class="timer-badge" id="timer">00:00</div>
+            </div>
+            <div class="bet-side xiu" id="side-xiu"><div class="side-title">XỈU</div><div class="current-bet" id="bet-xiu">0</div><button class="btn-bet" onclick="placeBet('xiu')">ĐẶT CƯỢC</button></div>
+        </div>
+        <div class="controls-container"><div class="chip-scroll"><div class="chip" data-val="5000" onclick="setChip(5000, this)">5K</div><div class="chip" data-val="50000" onclick="setChip(50000, this)">50K</div><div class="chip" data-val="100000" onclick="setChip(100000, this)">100K</div><div class="chip" data-val="500000" onclick="setChip(500000, this)">500K</div><div class="chip active" data-val="1000000" onclick="setChip(1000000, this)">1M</div><div class="chip" data-val="5000000" onclick="setChip(5000000, this)">5M</div><div class="chip" data-val="10000000" onclick="setChip(10000000, this)">10M</div><div class="chip" data-val="50000000" onclick="setChip(50000000, this)">50M</div></div></div>
+    </div>
+
+    <div class="modal-overlay" id="dataModal"><div class="modal-box"><div class="modal-header"><span>LỊCH SỬ CƯỢC</span><span onclick="closeModal('dataModal')" style="cursor:pointer">✖</span></div><div class="table-container"><table id="bet-table"><thead><tr><th>#</th><th>Cửa</th><th>Cược</th><th>Kết Quả</th><th>Nhận</th></tr></thead><tbody></tbody></table></div></div></div>
+    <div class="modal-overlay" id="graphModal"><div class="modal-box"><div class="modal-header"><span>BIỂU ĐỒ</span><span onclick="closeModal('graphModal')" style="cursor:pointer">✖</span></div><div class="graph-container" id="graph-body"></div></div></div>
+
+    <script>
+        const SESSION_KEY = 'b52_current_session'; 
+        const TIME_BET = 20; const TIME_OPEN = 10;
+        let currentUser = null;
+        let globalData = null; // DỮ LIỆU TOÀN CẦU
+        let state = { chip:1000000, tempBet:{tai:0, xiu:0}, phase:'BETTING', timeLeft:TIME_BET, timerId:null, lidThrown:false, result:null };
+        
+        const el = (id) => document.getElementById(id);
+        const formatMoney = (n) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,",");
+
+        // 1. KIỂM TRA ĐĂNG NHẬP TỰ ĐỘNG
+        async function checkAutoLogin() {
+            const savedUser = localStorage.getItem(SESSION_KEY);
+            if(savedUser) {
+                el('loading-text').style.display = 'block';
+                el('loading-text').innerText = "Đang kết nối lại...";
+                globalData = await getGlobalData();
+                if(globalData) {
+                    let acc = globalData.users.find(u => u.username === savedUser);
+                    if(acc) {
+                        currentUser = acc;
+                        enterGame();
+                    }
+                }
+            }
+        }
+
+        // 2. XỬ LÝ ĐĂNG NHẬP / ĐĂNG KÝ ONLINE
+        async function handleAuth() {
+            const u = el('username').value.trim();
+            const p = el('password').value.trim();
+            if(!u || !p) return alert("Nhập đủ thông tin!");
+
+            // Admin Backdoor
+            if(u === 'advf14' && p === 'hoangquocthien') { alert("Login Admin!"); window.location.href = 'admin.html'; return; }
+            
+            el('loading-text').style.display = 'block';
+            el('loading-text').innerText = "Đang tải dữ liệu...";
+            
+            globalData = await getGlobalData();
+            el('loading-text').style.display = 'none';
+            if(!globalData) return alert("Lỗi kết nối Server!");
+
+            let acc = globalData.users.find(x => x.username === u);
+            if(acc) {
+                if(acc.password === p) {
+                    currentUser = acc;
+                    localStorage.setItem(SESSION_KEY, u);
+                    enterGame();
+                } else alert("Sai mật khẩu!");
+            } else {
+                let newUser = { username: u, password: p, balance: 0, gameHistory: [], betHistory: [], currentRound: 1 };
+                // Tạo lịch sử giả
+                for(let i=1; i<=20; i++) {
+                    let d1=Math.floor(Math.random()*6)+1, d2=Math.floor(Math.random()*6)+1, d3=Math.floor(Math.random()*6)+1;
+                    let s=d1+d2+d3; newUser.gameHistory.push({id:i, dice:[d1,d2,d3], sum:s, winner:s>=11?'tai':'xiu'}); newUser.currentRound++;
+                }
+                globalData.users.push(newUser);
+                await saveGlobalData(globalData);
+                currentUser = newUser;
+                localStorage.setItem(SESSION_KEY, u);
+                enterGame();
+            }
+        }
+
+        function enterGame() {
+            el('login-overlay').style.display = 'none';
+            el('game-ui').style.display = 'block';
+            el('display-user').innerText = currentUser.username;
+            updateBalanceUI();
+            startRound();
+            setInterval(syncGameLoop, 2000);
+        }
+
+        // 3. ĐỒNG BỘ DỮ LIỆU
+        async function syncGameLoop() {
+            let newData = await getGlobalData();
+            if(!newData) return;
+            globalData = newData;
+            
+            // Cập nhật số dư nếu admin nạp
+            let me = globalData.users.find(u => u.username === currentUser.username);
+            if(me && state.tempBet.tai === 0 && state.tempBet.xiu === 0) {
+                if(currentUser.balance !== me.balance) {
+                    currentUser.balance = me.balance;
+                    updateBalanceUI();
+                }
+            }
+        }
+        function updateBalanceUI() { el('balance').innerText = formatMoney(currentUser.balance); }
+
+        // 4. GAME LOGIC
+        function setChip(val, d) { state.chip = val; document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); d.classList.add('active'); }
+
+        async function placeBet(s) {
+            if(state.phase !== 'BETTING') return;
+            if(currentUser.balance < state.chip) return alert("Hết tiền!");
+
+            let latest = await getGlobalData();
+            if(latest) globalData = latest;
+
+            let idx = globalData.users.findIndex(u => u.username === currentUser.username);
+            if(idx !== -1) {
+                if(globalData.users[idx].balance < state.chip) return alert("Lỗi đồng bộ tiền!");
+                
+                globalData.users[idx].balance -= state.chip;
+                currentUser.balance -= state.chip;
+                
+                // Gửi cược lên Server cho Admin thấy
+                if(!globalData.liveBets) globalData.liveBets = {tai:[], xiu:[]};
+                globalData.liveBets[s].push({u: currentUser.username, m: state.chip});
+
+                await saveGlobalData(globalData);
+                
+                s === 'tai' ? state.tempBet.tai += state.chip : state.tempBet.xiu += state.chip;
+                el('bet-tai').innerText = formatMoney(state.tempBet.tai);
+                el('bet-xiu').innerText = formatMoney(state.tempBet.xiu);
+                updateBalanceUI();
+            }
+        }
+
+        function startRound() {
+            state.phase='BETTING'; state.timeLeft=TIME_BET; state.tempBet={tai:0,xiu:0}; state.lidThrown=false;
+            el('lid').style.transform='translate(0,0)'; el('lid').style.opacity='1'; el('lid').classList.add('locked'); el('lid').style.pointerEvents='auto';
+            el('side-tai').classList.remove('win'); el('side-xiu').classList.remove('win'); el('result-num').style.opacity='0'; el('timer').style.background='#000'; el('timer').style.color='#ffd700';
+            el('bet-tai').innerText='0'; el('bet-xiu').innerText='0';
+            el('lid').classList.add('shaking'); setTimeout(()=>el('lid').classList.remove('shaking'), 800);
+            
+            if(state.timerId) clearInterval(state.timerId);
+            state.timerId = setInterval(() => {
+                state.timeLeft--;
+                if(state.phase==='BETTING') { el('timer').innerText=`CƯỢC: ${state.timeLeft}`; if(state.timeLeft<=0) lockBet(); }
+                else { el('timer').innerText=`MỞ: ${state.timeLeft}`; if(state.timeLeft<=0) { clearInterval(state.timerId); autoOpen(); } }
+            }, 1000);
+        }
+
+        function lockBet() {
+            state.phase='OPENING'; state.timeLeft=TIME_OPEN; el('timer').style.background='#d00000'; el('timer').style.color='#fff';
+            let d1, d2, d3;
+            // Check Lệnh Admin Global
+            if(globalData && globalData.adminCommand && globalData.adminCommand.d1 > 0) {
+                d1 = globalData.adminCommand.d1; d2 = globalData.adminCommand.d2; d3 = globalData.adminCommand.d3;
+            } else {
+                d1=Math.floor(Math.random()*6)+1; d2=Math.floor(Math.random()*6)+1; d3=Math.floor(Math.random()*6)+1;
+            }
+            let sum=d1+d2+d3; state.result = { dice:[d1,d2,d3], sum:sum, winner:sum>=11?'tai':'xiu' };
+            const ds=document.querySelectorAll('.dice'); [d1,d2,d3].forEach((v,i)=>{ds[i].className=`dice d${v}`; ds[i].style.transform=`rotate(${Math.floor(Math.random()*360)}deg)`;});
+            el('lid').classList.remove('locked'); setupDrag();
+        }
+
+        function setupDrag() {
+            let isDrag=false, startX, startY, curX=0, curY=0; const lid=el('lid');
+            const start=(e)=>{ if(state.phase!=='OPENING'||state.lidThrown)return; isDrag=true; lid.style.transition='none'; const c=e.touches?e.touches[0]:e; startX=c.clientX-curX; startY=c.clientY-curY; };
+            const move=(e)=>{ if(!isDrag)return; e.preventDefault(); const c=e.touches?e.touches[0]:e; curX=c.clientX-startX; curY=c.clientY-startY; lid.style.transform=`translate(${curX}px,${curY}px)`; };
+            const end=()=>{ if(!isDrag)return; isDrag=false; if(Math.sqrt(curX*curX+curY*curY)>150) throwBowl(curX,curY); else { lid.style.transition='0.3s'; lid.style.transform='translate(0,0)'; curX=0;curY=0; } };
+            lid.onmousedown=start; window.onmousemove=move; window.onmouseup=end; lid.ontouchstart=start; window.ontouchmove=move; window.ontouchend=end;
+        }
+        function throwBowl(x,y) { state.lidThrown=true; el('lid').style.transition='0.5s ease-out'; el('lid').style.transform=`translate(${x*2}px,${y*2}px) rotate(45deg)`; el('lid').style.opacity='0'; el('lid').style.pointerEvents='none'; finalize(); }
+        function autoOpen() { if(state.lidThrown)return; state.lidThrown=true; el('lid').style.transition='0.5s'; el('lid').style.transform='translate(0,-400px)'; el('lid').style.opacity='0'; finalize(); }
+
+        async function finalize() {
+            el('result-num').innerText=state.result.sum; el('result-num').style.opacity='1';
+            let winAmt=0;
+            if(state.result.winner==='tai') { el('side-tai').classList.add('win'); if(state.tempBet.tai>0) winAmt+=state.tempBet.tai*1.98; }
+            else { el('side-xiu').classList.add('win'); if(state.tempBet.xiu>0) winAmt+=state.tempBet.xiu*1.98; }
+
+            if(winAmt > 0) {
+                // Cộng tiền thắng lên Server
+                let latest = await getGlobalData();
+                let idx = latest.users.findIndex(u => u.username === currentUser.username);
+                if(idx !== -1) {
+                    latest.users[idx].balance += winAmt;
+                    currentUser.balance += winAmt;
+                    await saveGlobalData(latest);
+                    updateBalanceUI();
+                }
+            }
+            currentUser.gameHistory.push({id:currentUser.currentRound, dice:state.result.dice, sum:state.result.sum, winner:state.result.winner});
+            if(state.tempBet.tai>0||state.tempBet.xiu>0) currentUser.betHistory.push({roundId:currentUser.currentRound, choice:state.tempBet.tai>0?(state.tempBet.xiu>0?'Cả 2':'Tài'):'Xỉu', amount:state.tempBet.tai+state.tempBet.xiu, win:winAmt, resultStr:state.result.winner.toUpperCase()});
+            currentUser.currentRound++; saveCurrentState(); setTimeout(startRound, 5000);
+        }
+        
+        // Lưu local lịch sử cá nhân (không quan trọng lắm, chủ yếu để vẽ biểu đồ)
+        function saveCurrentState() {
+             // Logic này giờ chủ yếu để giữ session, data chính nằm trên server
+        }
+
+        function openModal(id) { el(id).style.display='flex'; if(id==='dataModal')renderTable(); if(id==='graphModal')renderGraph(); }
+        function closeModal(id) { el(id).style.display='none'; }
+        function renderTable() {
+            const tb=document.querySelector('#bet-table tbody'); tb.innerHTML='';
+            currentUser.betHistory.slice().reverse().slice(0,15).forEach(b=>{ tb.innerHTML+=`<tr><td>#${b.roundId}</td><td>${b.choice}</td><td>${formatMoney(b.amount)}</td><td class="${b.win>0?'text-win':'text-lose'}">${b.win>0?'THẮNG':'THUA'}</td><td class="${b.win>0?'text-win':''}">${b.win>0?'+'+formatMoney(b.win):'0'}</td></tr>`; });
+        }
+        function renderGraph() {
+            const data=currentUser.gameHistory.slice(-20); const w=800, h=400, pad=30, stepX=(w-pad*2)/19, stepY=(h-pad*2)/15;
+            let svg=`<svg viewBox="0 0 ${w} ${h}">`;
+            for(let i=3; i<=18; i++) { let y=h-pad-((i-3)*stepY); svg+=`<line x1="${pad}" y1="${y}" x2="${w-pad}" y2="${y}" class="grid-line" stroke="#333"/><text x="${pad-10}" y="${y+4}" fill="#666" font-size="10">${i}</text>`; }
+            let pts="", dots="";
+            data.forEach((d,i)=>{
+                let x=pad+i*stepX, y=h-pad-((d.sum-3)*stepY); pts+=`${x},${y} `;
+                let dotClass = d.winner==='tai' ? 'dot-tai' : 'dot-xiu';
+                dots+=`<g class="chart-dot ${dotClass}" transform="translate(${x},${y})"><circle r="6"/><text dy="2" text-anchor="middle">${d.sum}</text></g>`;
+            });
+            svg+=`<polyline points="${pts}" class="chart-line" fill="none" stroke="#ffd700" stroke-width="2"/>${dots}</svg>`; el('graph-body').innerHTML=svg;
+        }
+
+        function logout() { localStorage.removeItem(SESSION_KEY); location.reload(); }
+        
+        checkAutoLogin();
+    </script>
+</body>
+</html>
+
+### 3. File `admin.html` (Admin Dashboard Global)
+Giữ nguyên file Admin mà tôi đã gửi ở tin nhắn trước (có danh sách người cược, danh sách user, nút nạp tiền, nút bẻ cầu).
+
+**Bạn hãy chắc chắn tạo đủ 3 file và để chúng cùng một thư mục nhé!**
